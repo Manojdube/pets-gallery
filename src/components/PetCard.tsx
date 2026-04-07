@@ -88,9 +88,9 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
     navigate(`/pets/${pet.id}`);
   }, [navigate, pet.id]);
 
-  // Memoize formatted date
+  // Memoize formatted date with time including seconds
   const formattedDate = useMemo(() => {
-    return new Date(pet.created).toLocaleDateString();
+    return new Date(pet.created).toLocaleString();
   }, [pet.created]);
 
   return (

@@ -3,6 +3,7 @@ import { usePets } from "../hooks/usePets";
 import PetCard from "../components/PetCard";
 import { useSelectionActions, useSelectionState } from "../context/SelectionContext";
 import styled from "styled-components";
+import { useState, useMemo } from "react";
 
 const Container = styled.div`
   padding: 20px;
@@ -81,6 +82,39 @@ const DownloadButton = styled(Button)`
   }
 `;
 
+const SortContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+`;
+
+const SortLabel = styled.label`
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95em;
+`;
+
+const Select = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.9em;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+`;
+
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(1, 1fr);
@@ -133,6 +167,31 @@ const Home = () => {
   const { data, loading, error } = usePets();
   const { toggleSelection, selectAll, clearSelection } = useSelectionActions();
   const { selected, selectedIds } = useSelectionState();
+  const [sortBy, setSortBy] = useState<SortOption>("nameAZ");
+
+  // Sort data based on selected option - MUST be BEFORE early returns
+  const sortedData = useMemo(() => {
+    if (!data.length) return [];
+
+    const dataCopy = [...data];
+
+    switch (sortBy) {
+      case "nameAZ":
+        return dataCopy.sort((a, b) => a.title.localeCompare(b.title));
+      case "nameZA":
+        return dataCopy.sort((a, b) => b.title.localeCompare(a.title));
+      case "dateNewest":
+        return dataCopy.sort(
+          (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
+        );
+      case "dateOldest":
+        return dataCopy.sort(
+          (a, b) => new Date(a.created).getTime() - new Date(b.created).getTime()
+        );
+      default:
+        return dataCopy;
+    }
+  }, [data, sortBy]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -167,8 +226,23 @@ const Home = () => {
           </DownloadButton>
         </ButtonGroup>
       </Header>
+
+      <SortContainer>
+        <SortLabel htmlFor="sort-select">Sort by:</SortLabel>
+        <Select
+          id="sort-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+        >
+          <option value="nameAZ">Name A-Z</option>
+          <option value="nameZA">Name Z-A</option>
+          <option value="dateNewest">Date (Newest First)</option>
+          <option value="dateOldest">Date (Oldest First)</option>
+        </Select>
+      </SortContainer>
+
       <GridContainer>
-        {data.map((pet) => (
+        {sortedData.map((pet) => (
           <PetCard
             key={pet.id}
             pet={pet}
