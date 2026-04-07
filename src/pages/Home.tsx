@@ -17,15 +17,31 @@ const Header = styled.div`
   gap: 15px;
 `;
 
+const SelectionInfoGroup = styled.div`
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
 const SelectionInfo = styled.div`
   font-size: 1em;
   font-weight: 500;
   color: #333;
 `;
 
+const FileSize = styled.div`
+  font-size: 0.95em;
+  color: #666;
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 4px;
+`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 `;
 
 const Button = styled.button`
@@ -56,6 +72,15 @@ const ClearButton = styled(Button)`
   }
 `;
 
+const DownloadButton = styled(Button)`
+  background-color: #28a745;
+  border-color: #28a745;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(1, 1fr);
@@ -70,6 +95,40 @@ const GridContainer = styled.div`
   }
 `;
 
+// Format bytes to readable size
+const formatFileSize = (bytes: number): string => {
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+};
+
+// Download selected images
+const handleDownloadSelected = async (selected: any[]) => {
+  for (const pet of selected) {
+    try {
+      const response = await fetch(pet.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${pet.title.replace(/\s+/g, "_")}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error(`Failed to download ${pet.title}:`, error);
+    }
+  }
+};
+
 const Home = () => {
   const { data, loading, error } = usePets();
   const { toggleSelection, selectAll, clearSelection } = useSelectionActions();
@@ -80,18 +139,32 @@ const Home = () => {
   if (!data.length) return <p>No pets found</p>;
 
   const selectionCount = selected.length;
+  const totalFileSize = selected.reduce((sum, pet) => sum + pet.fileSize, 0);
 
   return (
     <Container>
       <Header>
-        <SelectionInfo>
-          Selected: <strong>{selectionCount}</strong> / {data.length}
-        </SelectionInfo>
+        <SelectionInfoGroup>
+          <SelectionInfo>
+            Selected: <strong>{selectionCount}</strong> / {data.length}
+          </SelectionInfo>
+          {selectionCount > 0 && (
+            <FileSize>
+              Total Size: <strong>{formatFileSize(totalFileSize)}</strong>
+            </FileSize>
+          )}
+        </SelectionInfoGroup>
         <ButtonGroup>
           <Button onClick={() => selectAll(data)}>Select All</Button>
           <ClearButton onClick={clearSelection} disabled={selectionCount === 0}>
             Clear Selection
           </ClearButton>
+          <DownloadButton
+            onClick={() => handleDownloadSelected(selected)}
+            disabled={selectionCount === 0}
+          >
+            Download ({selectionCount})
+          </DownloadButton>
         </ButtonGroup>
       </Header>
       <GridContainer>

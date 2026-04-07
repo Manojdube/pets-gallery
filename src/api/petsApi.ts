@@ -11,10 +11,11 @@ interface PetResponse {
 
 export const fetchPets = async (): Promise<Pet[]> => {
   const response = await apiFetch<PetResponse[]>("/pets");
-  
-  // Add unique IDs to each pet based on index
+
+  // Add unique IDs and random file sizes to each pet
   return response.map((pet, index) => ({
     ...pet,
-    id: `pet-${index}-${Date.now()}`, // Generate unique ID
+    id: `pet-${index}-${Date.now()}`,
+    fileSize: Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000, // 500KB - 5MB
   }));
 };

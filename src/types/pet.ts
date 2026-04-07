@@ -4,4 +4,5 @@ export interface Pet {
   description: string;
   url: string;
   created: string;
+  fileSize: number; // File size in bytes
 }
