@@ -1,5 +1,4 @@
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import type { SortOption } from "./SortControls";
 
 export interface HeaderProps {
   searchQuery: string;
@@ -13,6 +12,8 @@ export interface HeaderProps {
   onDownload?: () => void;
   onSortChange?: (sort: SortOption) => void;
 }
+
+export type SortOption = "nameAZ" | "nameZA" | "dateNewest" | "dateOldest";
 
 export interface SortOptionItem {
   value: SortOption;

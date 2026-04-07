@@ -10,7 +10,7 @@ import {
   SortDropdownItem,
 } from "./Header.styles";
 import { SORT_OPTIONS } from "./Header.constants";
-import type { SortOption } from "./SortControls";
+import type { SortOption } from "./Header.types";
 
 interface HeaderSortProps {
   sortBy: SortOption;
