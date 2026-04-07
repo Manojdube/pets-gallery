@@ -1,16 +1,31 @@
 // pages/Home.tsx
 import { usePets } from "../hooks/usePets";
 import { useSelectionActions, useSelectionState } from "../context";
-import { SearchBar } from "../components/SearchBar";
-import { SortControls, type SortOption } from "../components/SortControls";
-import { SelectionControls } from "../components/SelectionControls";
+import { Header } from "../components/Header/Header";
+import { type SortOption } from "../components/SortControls";
 import { PetGallery } from "../components/PetGallery";
 import { filterAndSortPets, downloadSelectedPets } from "../utils/petUtils";
 import styled from "styled-components";
 import { useState, useMemo } from "react";
 
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #fafafa;
+`;
+
 const Container = styled.div`
   padding: 20px;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `;
 
 const ResultsInfo = styled.p`
@@ -23,6 +38,7 @@ const ResultsInfo = styled.p`
  * Home Page Component
  *
  * Main gallery page with:
+ * - Unified Header with logo, search, selection controls, and sort
  * - Pet filtering by search query
  * - Pet sorting options
  * - Multi-select with download capability
@@ -46,35 +62,39 @@ const Home = () => {
   if (!data.length) return <p>No pets found</p>;
 
   const selectionCount = selected.length;
-  const totalFileSize = selected.reduce((sum, pet) => sum + pet.fileSize, 0);
 
   return (
-    <Container>
-      <SelectionControls
+    <PageContainer>
+      {/* Unified Header with all controls */}
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         selectedCount={selectionCount}
         totalCount={data.length}
-        totalFileSize={totalFileSize}
+        sortBy={sortBy}
+        onLogoClick={() => globalThis.scrollTo({ top: 0, behavior: "smooth" })}
         onSelectAll={() => selectAll(data)}
         onClearSelection={clearSelection}
         onDownload={() => downloadSelectedPets(selected)}
+        onSortChange={setSortBy}
       />
 
-      <SortControls sortBy={sortBy} onSortChange={setSortBy} />
+      <Container>
+        {/* Results info */}
+        {searchQuery && (
+          <ResultsInfo>
+            Found {filteredAndSortedData.length} result(s) for "{searchQuery}"
+          </ResultsInfo>
+        )}
 
-      <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-
-      {searchQuery && (
-        <ResultsInfo>
-          Found {filteredAndSortedData.length} result(s) for "{searchQuery}"
-        </ResultsInfo>
-      )}
-
-      <PetGallery
-        pets={filteredAndSortedData}
-        selectedIds={selectedIds}
-        onToggleSelection={toggleSelection}
-      />
-    </Container>
+        {/* Gallery */}
+        <PetGallery
+          pets={filteredAndSortedData}
+          selectedIds={selectedIds}
+          onToggleSelection={toggleSelection}
+        />
+      </Container>
+    </PageContainer>
   );
 };
 
