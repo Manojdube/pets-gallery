@@ -12,7 +12,7 @@ export const downloadSelectedPets = async (selected: Pet[]): Promise<void> => {
       const url = globalThis.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${pet.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${pet.title.replaceAll(" ", "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       globalThis.URL.revokeObjectURL(url);

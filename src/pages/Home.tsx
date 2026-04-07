@@ -1,6 +1,6 @@
 // pages/Home.tsx
 import { usePets } from "../hooks/usePets";
-import { useSelectionActions, useSelectionState } from "../context/SelectionContext";
+import { useSelectionActions, useSelectionState } from "../context";
 import { SearchBar } from "../components/SearchBar";
 import { SortControls, type SortOption } from "../components/SortControls";
 import { SelectionControls } from "../components/SelectionControls";

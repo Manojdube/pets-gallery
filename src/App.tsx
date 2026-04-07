@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import { PetDetail } from "./pages/PetDetail";
-import { SelectionProvider } from "./context/SelectionContext";
+import { SelectionProvider } from "./context";
 
 function App() {
   return (
