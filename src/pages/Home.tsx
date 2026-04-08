@@ -1,14 +1,14 @@
-// pages/Home.tsx
-import { usePetsData } from "../context";
-import { Header } from "../components/Header/Header";
-import { type SortOption } from "../components/SortControls";
-import { VirtualizedPetGallery } from "../components/VirtualizedPetGallery";
-import { SkeletonLoader } from "../components/SkeletonLoader";
-import { filterAndSortPets, downloadSelectedPets } from "../utils/petUtils";
-import type { Pet } from "../types/pet";
-import styled from "styled-components";
-import { useState, useMemo, useCallback } from "react";
+import { usePetsData, useSelection } from '../context';
+import { Header } from '../components/Header/Header';
+import { type SortOption } from '../components/SortControls';
+import { PetGallery } from '../components/PetGallery';
+import { SkeletonLoader } from '../components/SkeletonLoader';
+import { filterAndSortPets, downloadSelectedPets } from '../utils/petUtils';
+import type { Pet } from '../types/pet';
+import styled from 'styled-components';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 
+// Styles
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -30,79 +30,116 @@ const ResultsInfo = styled.p`
   margin: 0 0 10px 0;
 `;
 
+// Constants
+const DEFAULT_SORT: SortOption = 'nameAZ';
+const DEFAULT_SEARCH = '';
+const SESSION_DEFAULTS_KEY = 'petGallery_sessionStarted';
+
 /**
- * Home Page Component
+ * Home Page - Main gallery view for pets
  *
- * Main gallery page with:
- * - Fetch all pets once at startup
- * - Selection state stored per pet object
- * - Virtualized grid for performance
- * - Skeleton loader for initial state
- * - Pet filtering by search query
- * - Pet sorting options
- * - Multi-select with download capability
+ * Features:
+ * - Displays paginated grid of pets (12 items per page)
+ * - Search pets by title/description
+ * - Sort by name or date
+ * - Multi-select pets with persistent state
+ * - Download selected pets as images
+ * - Auto-clear selections on search/sort to prevent stale selections
+ * - Responsive layout (1 col mobile, 2 col tablet, 4 col desktop)
+ *
+ * State Management:
+ * - PetsDataProvider: Manages pet data fetching and caching (24hr TTL)
+ * - SelectionProvider: Manages pet selections with localStorage persistence
+ * - Hard reload detection: Clears cache and selections on F5/Cmd+R
  */
 const Home = () => {
-  const { pets, isLoading, error, toggleSelection, selectAll, clearSelection } = usePetsData();
-  const [sortBy, setSortBy] = useState<SortOption>("nameAZ");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { pets, isLoading, error } = usePetsData();
+  const { selected, selectAll, clearSelection, toggleSelection } = useSelection();
+  const [sortBy, setSortBy] = useState<SortOption>(DEFAULT_SORT);
+  const [searchQuery, setSearchQuery] = useState(DEFAULT_SEARCH);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // Calculate selected count from pet objects
-  const selectedCount = useMemo(
-    () => pets.filter((pet) => pet.selected).length,
-    [pets]
-  );
+  // Reset state on hard reload (session start)
+  useEffect(() => {
+    const isNewSession = sessionStorage.getItem(SESSION_DEFAULTS_KEY) === 'true';
+    if (isNewSession) {
+      setSortBy(DEFAULT_SORT);
+      setSearchQuery(DEFAULT_SEARCH);
+      clearSelection();
+      sessionStorage.removeItem(SESSION_DEFAULTS_KEY);
+    }
+  }, [clearSelection]);
 
-  // Filter and sort data
   const filteredAndSortedData = useMemo(
     () => filterAndSortPets(pets, searchQuery, sortBy),
     [pets, searchQuery, sortBy]
   );
 
-  // Get selected pets for download
-  const selectedPets = useMemo(
-    () => pets.filter((pet) => pet.selected),
-    [pets]
-  );
-
-  // Memoized toggle handler
   const handleToggleSelection = useCallback(
-    (pet: Pet) => {
-      toggleSelection(pet.id);
-    },
+    (pet: Pet) => toggleSelection(pet),
     [toggleSelection]
   );
 
-  // Memoized select all handler
-  const handleSelectAll = useCallback(() => {
-    selectAll();
-  }, [selectAll]);
+  /**
+   * Handle search input changes
+   * Clears existing selections to prevent confusion with filtered results
+   * Selections persist across searches but are cleared when new search starts
+   */
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      clearSelection();
+      setSearchQuery(query);
+    },
+    [clearSelection]
+  );
 
-  // Memoized clear selection handler
-  const handleClearSelection = useCallback(() => {
-    clearSelection();
-  }, [clearSelection]);
+  /**
+   * Handle sort option changes
+   * Clears existing selections to prevent confusion with re-ordered results
+   */
+  const handleSortChange = useCallback(
+    (sort: SortOption) => {
+      clearSelection();
+      setSortBy(sort);
+    },
+    [clearSelection]
+  );
 
-  // Memoized download handler
-  const handleDownload = useCallback(() => {
-    downloadSelectedPets(selectedPets);
-  }, [selectedPets]);
+  const scrollToTop = () => globalThis.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const handleDownload = useCallback(async () => {
+    if (selected.length === 0) return;
+    
+    setIsDownloading(true);
+    try {
+      await downloadSelectedPets(selected);
+      // Clear selection immediately after successful download
+      clearSelection();
+      setIsDownloading(false);
+    } catch (err) {
+      console.error('Download failed:', err);
+      setIsDownloading(false);
+    }
+  }, [selected, clearSelection]);
+
+  const headerProps = {
+    searchQuery,
+    onSearchChange: handleSearchChange,
+    selectedCount: selected.length,
+    totalCount: pets.length,
+    sortBy,
+    onLogoClick: scrollToTop,
+    onSelectAll: () => selectAll(filteredAndSortedData),
+    onClearSelection: clearSelection,
+    onDownload: handleDownload,
+    onSortChange: handleSortChange,
+    isDownloading,
+  } as const;
 
   if (error) {
     return (
       <PageContainer>
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedCount={selectedCount}
-          totalCount={pets.length}
-          sortBy={sortBy}
-          onLogoClick={() => globalThis.scrollTo({ top: 0, behavior: "smooth" })}
-          onSelectAll={handleSelectAll}
-          onClearSelection={handleClearSelection}
-          onDownload={handleDownload}
-          onSortChange={setSortBy}
-        />
+        <Header {...headerProps} />
         <ErrorContainer>Error loading pets: {error}</ErrorContainer>
       </PageContainer>
     );
@@ -110,37 +147,17 @@ const Home = () => {
 
   return (
     <PageContainer>
-      {/* Unified Header with all controls */}
-      <Header
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedCount={selectedCount}
-        totalCount={pets.length}
-        sortBy={sortBy}
-        onLogoClick={() => globalThis.scrollTo({ top: 0, behavior: "smooth" })}
-        onSelectAll={handleSelectAll}
-        onClearSelection={handleClearSelection}
-        onDownload={handleDownload}
-        onSortChange={setSortBy}
-      />
-
-      {/* Show skeleton loader while loading */}
+      <Header {...headerProps} />
       {isLoading ? (
         <SkeletonLoader count={12} />
       ) : (
         <>
-          {/* Results info */}
           {searchQuery && (
             <ResultsInfo>
               Found {filteredAndSortedData.length} result(s) for "{searchQuery}"
             </ResultsInfo>
           )}
-
-          {/* Virtualized Gallery */}
-          <VirtualizedPetGallery
-            pets={filteredAndSortedData}
-            onToggleSelection={handleToggleSelection}
-          />
+          <PetGallery pets={filteredAndSortedData} onToggleSelection={handleToggleSelection} />
         </>
       )}
     </PageContainer>

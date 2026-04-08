@@ -17,6 +17,7 @@ interface HeaderActionsProps {
   onSelectAll?: () => void;
   onClearSelection?: () => void;
   onDownload?: () => void;
+  isDownloading?: boolean;
 }
 
 export const HeaderActions = ({
@@ -25,6 +26,7 @@ export const HeaderActions = ({
   onSelectAll,
   onClearSelection,
   onDownload,
+  isDownloading = false,
 }: HeaderActionsProps) => {
   const hasSelection = selectedCount > 0;
   const allSelected = selectedCount === totalCount && totalCount > 0;
@@ -62,11 +64,12 @@ export const HeaderActions = ({
       <DownloadWrapper>
         <IconOnlyButton
           onClick={onDownload}
-          disabled={!hasSelection}
+          disabled={!hasSelection || isDownloading}
           aria-label={downloadLabel}
           data-tooltip-id="header-tooltip"
-          data-tooltip-content={downloadLabel}
+          data-tooltip-content={isDownloading ? "Downloading..." : downloadLabel}
           data-tooltip-place="bottom"
+          style={{ opacity: isDownloading ? 0.6 : 1 }}
         >
           <FontAwesomeIcon icon={faDownload} />
         </IconOnlyButton>

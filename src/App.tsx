@@ -1,11 +1,11 @@
-// App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import styled from "styled-components";
-import Home from "./pages/Home";
-import { PetDetail } from "./pages/PetDetail";
-import About from "./pages/About";
-import { PetsDataProvider, PetDetailProvider } from "./context";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import styled from 'styled-components';
+import Home from './pages/Home';
+import { PetDetail } from './pages/PetDetail';
+import About from './pages/About';
+import { PetsDataProvider, PetDetailProvider, SelectionProvider } from './context';
 
+// Styles
 const NotFoundContainer = styled.div`
   display: flex;
   align-items: center;
@@ -43,6 +43,7 @@ const HomeButton = styled.a`
   }
 `;
 
+// Components
 const NotFound = () => (
   <NotFoundContainer>
     <NotFoundTitle>404</NotFoundTitle>
@@ -54,16 +55,18 @@ const NotFound = () => (
 function App() {
   return (
     <PetsDataProvider>
-      <PetDetailProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/pets/:id" element={<PetDetail />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </PetDetailProvider>
+      <SelectionProvider>
+        <PetDetailProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/pets/:id" element={<PetDetail />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </PetDetailProvider>
+      </SelectionProvider>
     </PetsDataProvider>
   );
 }

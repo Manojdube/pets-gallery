@@ -4,12 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import { usePetDetail } from '../context';
 import type { Pet } from '../types/pet';
 
+// Types
 interface PetCardProps {
   pet: Pet;
   isSelected: boolean;
   onToggleSelection: (pet: Pet) => void;
 }
 
+/**
+ * PetCard Component - Individual pet card in the gallery
+ *
+ * Features:
+ * - Displays pet image, title, description, and last updated date
+ * - Checkbox for quick selection toggle
+ * - Click card to navigate to pet detail view
+ * - Visual feedback for selected state (blue border + light background)
+ * - Selection state does not change when viewing details
+ *
+ * Behavior:
+ * - Checkbox click (with stopPropagation) → toggles selection without navigation
+ * - Card click → navigates to detail view without affecting selection
+ * - Memoized to prevent unnecessary re-renders when parent updates
+ *
+ * @component
+ */
+
+// Styles
 const CardWrapper = styled.div`
   position: relative;
 `;
@@ -36,6 +56,7 @@ const Card = styled.div<{ isSelected: boolean }>`
   cursor: pointer;
   background-color: ${(props) => (props.isSelected ? '#f0f7ff' : 'white')};
   border-radius: 8px;
+  transition: box-shadow 0.2s ease;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -49,12 +70,16 @@ const PetImage = styled.img`
   border-radius: 6px;
 `;
 
-const PetTitle = styled.h3`
+const PetInfoText = styled.p`
   margin: 5px 0;
+
+  &:first-of-type {
+    font-size: 1.05em;
+    font-weight: 600;
+  }
 `;
 
-const Description = styled.p`
-  margin: 5px 0;
+const Description = styled(PetInfoText)`
   font-size: 0.85em;
   color: #555;
   line-height: 1.3;
@@ -65,8 +90,7 @@ const Description = styled.p`
   -webkit-box-orient: vertical;
 `;
 
-const LastUpdated = styled.p`
-  margin: 5px 0 0 0;
+const LastUpdated = styled(PetInfoText)`
   font-size: 0.75em;
   color: #999;
 `;
@@ -78,29 +102,34 @@ const DetailsLink = styled.span`
   text-decoration: underline;
 `;
 
+// Component
 const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection }) => {
   const navigate = useNavigate();
   const { setCurrentPet } = usePetDetail();
 
-  // Memoize handlers
-  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    onToggleSelection(pet);
-  }, [pet, onToggleSelection]);
+  const formattedDate = useMemo(() => new Date(pet.created).toLocaleString(), [pet.created]);
 
+  /**
+   * Handle checkbox change
+   * stopPropagation prevents card click from being triggered
+   */
+  const handleCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      onToggleSelection(pet);
+    },
+    [pet, onToggleSelection]
+  );
+
+  /**
+   * Handle card click (View Details)
+   * Only navigates to detail view without affecting selection state
+   */
   const handleCardClick = useCallback(() => {
-    // Toggle selection and navigate to details
-    onToggleSelection(pet);
+    // Only navigate and set current pet, don't toggle selection
     setCurrentPet(pet);
-    setTimeout(() => {
-      navigate(`/pets/${pet.id}`);
-    }, 100);
-  }, [navigate, pet, setCurrentPet, onToggleSelection]);
-
-  // Memoize formatted date with time including seconds
-  const formattedDate = useMemo(() => {
-    return new Date(pet.created).toLocaleString();
-  }, [pet.created]);
+    navigate(`/pets/${pet.id}`);
+  }, [navigate, pet, setCurrentPet]);
 
   return (
     <CardWrapper>
@@ -110,11 +139,12 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
           type="checkbox"
           checked={isSelected}
           onChange={handleCheckboxChange}
+          aria-label={`Select ${pet.title}`}
         />
       </CheckboxContainer>
       <Card isSelected={isSelected} onClick={handleCardClick}>
         <PetImage src={pet.url} alt={pet.title} />
-        <PetTitle>{pet.title}</PetTitle>
+        <PetInfoText>{pet.title}</PetInfoText>
         <Description>{pet.description}</Description>
         <LastUpdated>Last updated: {formattedDate}</LastUpdated>
         <DetailsLink>View Details</DetailsLink>

@@ -1,7 +1,16 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-type SortOption = "nameAZ" | "nameZA" | "dateNewest" | "dateOldest";
+// Types
+export type SortOption = 'nameAZ' | 'nameZA' | 'dateNewest' | 'dateOldest';
 
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'nameAZ', label: 'Name A-Z' },
+  { value: 'nameZA', label: 'Name Z-A' },
+  { value: 'dateNewest', label: 'Date (Newest First)' },
+  { value: 'dateOldest', label: 'Date (Oldest First)' },
+];
+
+// Styles
 const SortContainer = styled.div`
   display: flex;
   gap: 10px;
@@ -23,6 +32,7 @@ const Select = styled.select`
   background-color: white;
   cursor: pointer;
   font-size: 0.9em;
+  transition: border-color 0.2s ease;
 
   &:hover {
     border-color: #007bff;
@@ -35,27 +45,22 @@ const Select = styled.select`
   }
 `;
 
+// Types & Props
 interface SortControlsProps {
   sortBy: SortOption;
   onSortChange: (value: SortOption) => void;
 }
 
-export const SortControls: React.FC<SortControlsProps> = ({ sortBy, onSortChange }) => {
-  return (
-    <SortContainer>
-      <SortLabel htmlFor="sort-select">Sort by:</SortLabel>
-      <Select
-        id="sort-select"
-        value={sortBy}
-        onChange={(e) => onSortChange(e.target.value as SortOption)}
-      >
-        <option value="nameAZ">Name A-Z</option>
-        <option value="nameZA">Name Z-A</option>
-        <option value="dateNewest">Date (Newest First)</option>
-        <option value="dateOldest">Date (Oldest First)</option>
-      </Select>
-    </SortContainer>
-  );
-};
-
-export type { SortOption };
+// Component
+export const SortControls: React.FC<SortControlsProps> = ({ sortBy, onSortChange }) => (
+  <SortContainer>
+    <SortLabel htmlFor="sort-select">Sort by:</SortLabel>
+    <Select id="sort-select" value={sortBy} onChange={(e) => onSortChange(e.target.value as SortOption)}>
+      {SORT_OPTIONS.map(({ value, label }) => (
+        <option key={value} value={value}>
+          {label}
+        </option>
+      ))}
+    </Select>
+  </SortContainer>
+);

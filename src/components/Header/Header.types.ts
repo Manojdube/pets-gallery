@@ -11,6 +11,7 @@ export interface HeaderProps {
   onClearSelection?: () => void;
   onDownload?: () => void;
   onSortChange?: (sort: SortOption) => void;
+  isDownloading?: boolean;
 }
 
 export type SortOption = "nameAZ" | "nameZA" | "dateNewest" | "dateOldest";

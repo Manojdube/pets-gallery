@@ -41,6 +41,7 @@ export const Header = ({
   onClearSelection,
   onDownload,
   onSortChange,
+  isDownloading = false,
 }: HeaderProps) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
 
@@ -60,6 +61,7 @@ export const Header = ({
           onSelectAll={onSelectAll}
           onClearSelection={onClearSelection}
           onDownload={onDownload}
+          isDownloading={isDownloading}
         />
 
         <HeaderSort
