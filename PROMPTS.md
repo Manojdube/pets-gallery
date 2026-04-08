@@ -49,7 +49,7 @@ pets-gallery/
 Add the following npm packages to the project:
 - react-router-dom for client-side routing
 - styled-components for component styling
-- axios or fetch API wrapper for HTTP requests
+- fetch API wrapper for HTTP requests
 
 Create folder structure for:
 - /src/components for reusable UI components
@@ -690,9 +690,126 @@ Also add immediate visual feedback:
 
 ---
 
-## Phase 14: Code Quality & Documentation
+## Phase 15: Display File Sizes for Selected Items
 
-### Step 18: Add Comprehensive Code Documentation
+### Step 18: Show Total File Size & Item Count
+
+**Prompt Sent:**
+```
+Add file size estimation feature that displays:
+1. Total count of selected items (e.g., "3")
+2. Total file size of selected items (e.g., "2.5 MB")
+3. Display in download button badge and tooltip
+
+Requirements:
+1. Create formatFileSize(bytes) utility:
+   - Converts bytes to human-readable: 1024 → "1.00 KB"
+   - Supports B, KB, MB, GB, TB units
+   - Returns format: "XX.XX UNIT"
+
+2. Create calculateTotalFileSize(pets) utility:
+   - Sum all pet.fileSize values
+   - Handle missing fileSize property (default to 0)
+   - Return total bytes
+
+3. In Home.tsx:
+   - Calculate total file size from selected array
+   - Pass formattedFileSize to Header
+   - Update useMemo to avoid recalculation
+
+4. Update Header components:
+   - Download button tooltip: "Download 3 items (2.5 MB)"
+   - Count badge shows:
+     └─ count on top
+     └─ file size below (smaller text)
+
+5. Visual display:
+   Badge shows: 
+   ┌─────────┐
+   │    3    │  (count)
+   │ 2.5 MB  │  (file size, smaller)
+   └─────────┘
+```
+
+**Generated File Size Utilities:**
+
+```typescript
+export const formatFileSize = (bytes: number, decimals: number = 2): string => {
+  if (bytes === 0) return '0 B';
+  
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const value = bytes / Math.pow(k, i);
+  
+  return `${value.toFixed(decimals)} ${sizes[i]}`;
+};
+
+export const calculateTotalFileSize = (pets: Pet[]): number => {
+  return pets.reduce((total, pet) => total + (pet.fileSize || 0), 0);
+};
+```
+
+**Integration in Home.tsx:**
+
+```typescript
+const totalSelectedFileSize = useMemo(
+  () => calculateTotalFileSize(selected),
+  [selected]
+);
+
+const formattedFileSize = formatFileSize(totalSelectedFileSize);
+
+const headerProps = {
+  selectedCount: selected.length,
+  formattedFileSize: formattedFileSize, // "2.5 MB"
+  // ... other props
+};
+```
+
+**Header Display Changes:**
+
+```typescript
+// Download button tooltip now shows:
+const downloadLabel = hasSelection
+  ? `Download ${selectedCount} items (${formattedFileSize})`
+  : "Select items to download";
+
+// Count badge renders:
+<CountBadge $show={hasSelection}>
+  {selectedCount}
+  {hasSelection && formattedFileSize && (
+    <>
+      <br />
+      <small>{formattedFileSize}</small>
+    </>
+  )}
+</CountBadge>
+```
+
+**Features Delivered:**
+
+✅ File size formatting (B, KB, MB, GB, TB)
+✅ Real-time calculation from selected pets
+✅ Display in download button tooltip
+✅ Display in count badge (two-line format)
+✅ Memoized for performance
+✅ Handles edge cases (zero size, missing fileSize)
+✅ Uses existing fileSize property from Pet interface
+✅ TypeScript fully typed
+
+**User Impact:**
+
+- Users see estimated download size before clicking download
+- Helps decide whether to add/remove selections
+- Useful on slow connections or limited bandwidth
+- All happen in real-time as selections change
+
+---
+
+## Phase 16: Code Documentation
+
+### Step 19: Add Comprehensive Code Documentation
 
 **Prompt Sent:**
 ```

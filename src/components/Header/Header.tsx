@@ -35,6 +35,7 @@ export const Header = ({
   onSearchChange,
   selectedCount = 0,
   totalCount = 0,
+  selectedTotalFileSize = "",
   sortBy = "nameAZ",
   onLogoClick,
   onSelectAll,
@@ -58,6 +59,7 @@ export const Header = ({
         <HeaderActions
           selectedCount={selectedCount}
           totalCount={totalCount}
+          selectedTotalFileSize={selectedTotalFileSize}
           onSelectAll={onSelectAll}
           onClearSelection={onClearSelection}
           onDownload={onDownload}

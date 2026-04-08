@@ -3,7 +3,7 @@ import { Header } from '../components/Header/Header';
 import { type SortOption } from '../components/SortControls';
 import { PetGallery } from '../components/PetGallery';
 import { SkeletonLoader } from '../components/SkeletonLoader';
-import { filterAndSortPets, downloadSelectedPets } from '../utils/petUtils';
+import { filterAndSortPets, downloadSelectedPets, calculateTotalFileSize, formatFileSize } from '../utils/petUtils';
 import type { Pet } from '../types/pet';
 import styled from 'styled-components';
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -127,6 +127,7 @@ const Home = () => {
     onSearchChange: handleSearchChange,
     selectedCount: selected.length,
     totalCount: pets.length,
+    selectedTotalFileSize: formatFileSize(calculateTotalFileSize(selected)),
     sortBy,
     onLogoClick: scrollToTop,
     onSelectAll: () => selectAll(filteredAndSortedData),

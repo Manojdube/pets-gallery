@@ -226,6 +226,10 @@ export const IconOnlyButton = styled.button`
 
 export const DownloadWrapper = styled.div`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 `;
 
 export const CountBadge = styled.div<{ $show: boolean }>`
@@ -247,6 +251,16 @@ export const CountBadge = styled.div<{ $show: boolean }>`
   opacity: ${(p) => (p.$show ? 1 : 0)};
   transform: ${(p) => (p.$show ? "scale(1)" : "scale(0.5)")};
   transition: opacity 0.2s ease, transform 0.2s ease;
+`;
+
+export const FileSizeText = styled.div<{ $show: boolean }>`
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  white-space: nowrap;
+  opacity: ${(p) => (p.$show ? 1 : 0)};
+  transition: opacity 0.2s ease;
+  text-align: center;
 `;
 
 // ─── Sort ──────────────────────────────────────────────────────────────────────

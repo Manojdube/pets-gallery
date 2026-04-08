@@ -5,6 +5,7 @@ export interface HeaderProps {
   onSearchChange: (query: string) => void;
   selectedCount?: number;
   totalCount?: number;
+  selectedTotalFileSize?: string;
   sortBy?: SortOption;
   onLogoClick?: () => void;
   onSelectAll?: () => void;

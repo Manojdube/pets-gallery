@@ -9,11 +9,13 @@ import {
   IconOnlyButton,
   DownloadWrapper,
   CountBadge,
+  FileSizeText,
 } from "./Header.styles";
 
 interface HeaderActionsProps {
   selectedCount: number;
   totalCount: number;
+  selectedTotalFileSize?: string;
   onSelectAll?: () => void;
   onClearSelection?: () => void;
   onDownload?: () => void;
@@ -23,6 +25,7 @@ interface HeaderActionsProps {
 export const HeaderActions = ({
   selectedCount,
   totalCount,
+  selectedTotalFileSize = "",
   onSelectAll,
   onClearSelection,
   onDownload,
@@ -31,11 +34,14 @@ export const HeaderActions = ({
   const hasSelection = selectedCount > 0;
   const allSelected = selectedCount === totalCount && totalCount > 0;
   const downloadLabel = hasSelection
-    ? `Download ${selectedCount} ${selectedCount === 1 ? "item" : "items"}`
+    ? `Download ${selectedCount} ${selectedCount === 1 ? "item" : "items"}${selectedTotalFileSize ? ` (${selectedTotalFileSize})` : ""}`
     : "Select items to download";
 
   return (
     <ActionsSection>
+       <FileSizeText $show={hasSelection && !!selectedTotalFileSize}>
+        {selectedTotalFileSize}
+      </FileSizeText>
       {/* Select All */}
       <IconOnlyButton
         onClick={onSelectAll}
@@ -59,7 +65,7 @@ export const HeaderActions = ({
       >
         <FontAwesomeIcon icon={faCircleXmark} />
       </IconOnlyButton>
-
+     
       {/* Download with badge */}
       <DownloadWrapper>
         <IconOnlyButton
@@ -67,15 +73,17 @@ export const HeaderActions = ({
           disabled={!hasSelection || isDownloading}
           aria-label={downloadLabel}
           data-tooltip-id="header-tooltip"
-          data-tooltip-content={isDownloading ? "Downloading..." : downloadLabel}
+          data-tooltip-content={
+            isDownloading ? "Downloading..." : downloadLabel
+          }
           data-tooltip-place="bottom"
           style={{ opacity: isDownloading ? 0.6 : 1 }}
         >
           <FontAwesomeIcon icon={faDownload} />
+          <CountBadge $show={hasSelection} aria-hidden="true">
+            {selectedCount}
+          </CountBadge>
         </IconOnlyButton>
-        <CountBadge $show={hasSelection} aria-hidden="true">
-          {selectedCount}
-        </CountBadge>
       </DownloadWrapper>
     </ActionsSection>
   );

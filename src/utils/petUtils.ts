@@ -1,6 +1,41 @@
 import type { Pet } from '../types/pet';
 import type { SortOption } from '../components/SortControls';
 
+// File Size Utilities
+/**
+ * Format bytes into human-readable file size (B, KB, MB, GB)
+ * 
+ * @param bytes - Number of bytes to format
+ * @returns Formatted string (e.g., "2.5 MB", "512 KB")
+ * @example
+ * formatFileSize(2621440) // "2.5 MB"
+ */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+  
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const k = 1024;
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const size = bytes / Math.pow(k, i);
+  
+  // Return whole numbers without decimals, otherwise 1 decimal place
+  return size % 1 === 0 
+    ? `${Math.floor(size)} ${units[i]}`
+    : `${size.toFixed(1)} ${units[i]}`;
+};
+
+/**
+ * Calculate total file size of selected pets
+ * 
+ * @param selected - Array of selected Pet objects
+ * @returns Total size in bytes
+ * @example
+ * const totalBytes = calculateTotalFileSize([pet1, pet2, pet3]);
+ */
+export const calculateTotalFileSize = (selected: Pet[]): number => {
+  return selected.reduce((total, pet) => total + (pet.fileSize || 0), 0);
+};
+
 /**
  * Download selected pets as individual image files
  *
