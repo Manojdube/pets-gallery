@@ -3,9 +3,9 @@ import styled from "styled-components";
 // ─── Layout ────────────────────────────────────────────────────────────────────
 
 export const HeaderContainer = styled.header`
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   padding: 12px 20px;
   background: white;
   border-bottom: 1px solid #e0e0e0;
@@ -98,53 +98,23 @@ export const LogoText = styled.span`
 
 // ─── Search ────────────────────────────────────────────────────────────────────
 
-export const SearchSection = styled.div<{ $isExpanded: boolean }>`
-  flex: ${(p) => (p.$isExpanded ? 1 : "none")};
-  max-width: ${(p) => (p.$isExpanded ? "500px" : "44px")};
-  min-width: ${(p) => (p.$isExpanded ? "200px" : "auto")};
+export const SearchSection = styled.div`
+  width: 100%;
+  max-width: 500px;
   position: relative;
-  margin: 0 20px;
-  transition: all 0.3s ease;
+  margin: 0 auto;
 
   @media (max-width: 768px) {
-    max-width: ${(p) => (p.$isExpanded ? "300px" : "44px")};
-    margin: 0 12px;
+    max-width: 350px;
   }
 
   @media (max-width: 640px) {
-    flex: ${(p) => (p.$isExpanded ? 1 : "none")};
-    max-width: ${(p) => (p.$isExpanded ? "none" : "44px")};
-    min-width: auto;
-    margin: 0 8px;
+    max-width: 250px;
   }
 `;
 
 export const SearchIconButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-
-  &:hover { color: #667eea; }
-
-  &:focus-visible {
-    outline: 2px solid #667eea;
-    outline-offset: 2px;
-  }
+  display: none;
 `;
 
 export const SearchInputWrapper = styled.div`
@@ -153,15 +123,14 @@ export const SearchInputWrapper = styled.div`
   position: relative;
 `;
 
-export const SearchInput = styled.input<{ $isExpanded: boolean }>`
-  width: ${(p) => (p.$isExpanded ? "100%" : "0")};
-  padding: ${(p) => (p.$isExpanded ? "10px 40px 10px 44px" : "0")};
+export const SearchInput = styled.input`
+  width: 100%;
+  padding: 10px 16px 10px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 24px;
   font-size: 14px;
   background-color: #f8f9fa;
-  opacity: ${(p) => (p.$isExpanded ? 1 : 0)};
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:focus {
     outline: none;
@@ -173,7 +142,7 @@ export const SearchInput = styled.input<{ $isExpanded: boolean }>`
   &::placeholder { color: #999; }
 
   @media (max-width: 640px) {
-    padding: ${(p) => (p.$isExpanded ? "8px 36px 8px 44px" : "0")};
+    padding: 8px 12px;
     font-size: 13px;
   }
 `;
@@ -181,6 +150,8 @@ export const SearchInput = styled.input<{ $isExpanded: boolean }>`
 export const SearchClearButton = styled.button`
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
@@ -194,7 +165,7 @@ export const SearchClearButton = styled.button`
 
   &:hover {
     color: #667eea;
-    transform: scale(1.1);
+    transform: translateY(-50%) scale(1.1);
   }
 
   &:focus-visible {
