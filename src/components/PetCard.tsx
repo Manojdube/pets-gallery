@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { usePetDetail } from '../context';
 import type { Pet } from '../types/pet';
 
 interface PetCardProps {
@@ -34,6 +35,7 @@ const Card = styled.div<{ isSelected: boolean }>`
   min-height: 250px;
   cursor: pointer;
   background-color: ${(props) => (props.isSelected ? '#f0f7ff' : 'white')};
+  border-radius: 8px;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -44,6 +46,7 @@ const PetImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
+  border-radius: 6px;
 `;
 
 const PetTitle = styled.h3`
@@ -77,6 +80,7 @@ const DetailsLink = styled.span`
 
 const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection }) => {
   const navigate = useNavigate();
+  const { setCurrentPet } = usePetDetail();
 
   // Memoize handlers
   const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,8 +89,13 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
   }, [pet, onToggleSelection]);
 
   const handleCardClick = useCallback(() => {
-    navigate(`/pets/${pet.id}`);
-  }, [navigate, pet.id]);
+    // Toggle selection and navigate to details
+    onToggleSelection(pet);
+    setCurrentPet(pet);
+    setTimeout(() => {
+      navigate(`/pets/${pet.id}`);
+    }, 100);
+  }, [navigate, pet, setCurrentPet, onToggleSelection]);
 
   // Memoize formatted date with time including seconds
   const formattedDate = useMemo(() => {

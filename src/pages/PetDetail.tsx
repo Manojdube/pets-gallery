@@ -1,9 +1,8 @@
 // pages/PetDetail.tsx
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { usePets } from "../hooks/usePets";
-import { useSelectionState, useSelectionActions } from "../context";
-import { useCallback } from "react";
+import { usePetDetail, usePetsData } from "../context";
+import { useState, useCallback, useMemo } from "react";
 
 const FullScreenContainer = styled.div`
   min-height: 100vh;
@@ -15,7 +14,7 @@ const FullScreenContainer = styled.div`
 const Header = styled.header`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 20px 24px;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
@@ -37,78 +36,98 @@ const BackButton = styled.button`
   }
 `;
 
-const SelectButton = styled(BackButton)<{ selected: boolean }>`
-  background: ${(props) =>
-    props.selected ? "rgba(52, 211, 153, 0.6)" : "rgba(255, 255, 255, 0.2)"};
-  border-color: ${(props) =>
-    props.selected
-      ? "rgba(52, 211, 153, 1)"
-      : "rgba(255, 255, 255, 0.3)"};
+const ContentWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  flex: 1;
+  padding: 40px 24px;
+  overflow: auto;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 16px;
+  }
+`;
+
+const LeftPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+`;
+
+const Title = styled.h1`
+  margin: 0 0 16px 0;
+  font-size: 2.5em;
+  color: white;
+  font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 1.8em;
+  }
+`;
+
+const Description = styled.p`
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.8;
+  margin: 0 0 24px 0;
+  font-size: 1.1em;
+
+  @media (max-width: 768px) {
+    font-size: 1em;
+  }
+`;
+
+const SizeInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: 1.05em;
+  color: rgba(255, 255, 255, 0.9);
+`;
+
+const DownloadButton = styled.button`
+  align-self: flex-start;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;
 
 const ImageWrapper = styled.div`
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
   overflow: hidden;
 `;
 
 const PetImage = styled.img`
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 80vh;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   object-fit: contain;
-`;
-
-const InfoPanel = styled.div`
-  background: white;
-  padding: 32px 24px;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-`;
-
-const Title = styled.h1`
-  margin: 0 0 8px 0;
-  font-size: 2em;
-  color: #333;
-`;
-
-const Description = styled.p`
-  color: #666;
-  line-height: 1.6;
-  margin: 12px 0;
-  font-size: 1.05em;
-`;
-
-const MetaInfo = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-`;
-
-const MetaItem = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const MetaLabel = styled.span`
-  font-size: 0.85em;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const MetaValue = styled.span`
-  font-size: 1.1em;
-  color: #333;
-  font-weight: 500;
-  margin-top: 4px;
 `;
 
 const LoadingContainer = styled.div`
@@ -121,37 +140,66 @@ const LoadingContainer = styled.div`
 `;
 
 export const PetDetail = () => {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, loading, error } = usePets();
-  const { selectedIds } = useSelectionState();
-  const { toggleSelection } = useSelectionActions();
+  const { id } = useParams<{ id: string }>();
+  const { currentPet } = usePetDetail();
+  const { pets, isLoading } = usePetsData();
+  const [imageLoadError, setImageLoadError] = useState(false);
 
-  const pet = data.find((p) => p.id === id);
-  const isSelected = pet ? selectedIds.has(pet.id) : false;
-
-  const handleSelectToggle = useCallback(() => {
-    if (pet) {
-      toggleSelection(pet);
+  // Try to get pet from context first (when clicked from card)
+  // Fall back to finding in pets array (for refresh scenarios)
+  const pet = useMemo(() => {
+    if (currentPet) return currentPet;
+    
+    // If page is refreshed, find pet from the global pets array
+    if (id && pets.length > 0) {
+      return pets.find((p) => p.id === id);
     }
-  }, [pet, toggleSelection]);
+    
+    return null;
+  }, [currentPet, id, pets]);
 
-  if (loading) {
+  const handleDownload = useCallback(async () => {
+    if (!pet) return;
+    
+    try {
+      const response = await fetch(pet.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pet-${pet.title.replaceAll(" ", "-")}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download image");
+    }
+  }, [pet]);
+
+  // Show loading if data is still loading
+  if (isLoading) {
     return (
       <FullScreenContainer>
+        <Header>
+          <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
+        </Header>
         <LoadingContainer>Loading pet details...</LoadingContainer>
       </FullScreenContainer>
     );
   }
 
-  if (error || !pet) {
+  // Show error if pet not found
+  if (!pet) {
     return (
       <FullScreenContainer>
         <Header>
           <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
         </Header>
         <LoadingContainer>
-          {error ? `Error: ${error}` : "Pet not found"}
+          Pet data not found. Please click on a pet card to view details.
         </LoadingContainer>
       </FullScreenContainer>
     );
@@ -161,38 +209,34 @@ export const PetDetail = () => {
     <FullScreenContainer>
       <Header>
         <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
-        <SelectButton
-          selected={isSelected}
-          onClick={handleSelectToggle}
-          title={isSelected ? "Remove from selection" : "Add to selection"}
-        >
-          {isSelected ? "✓ Selected" : "+ Select Pet"}
-        </SelectButton>
       </Header>
 
-      <ImageWrapper>
-        <PetImage src={pet.url} alt={pet.title} />
-      </ImageWrapper>
+      <ContentWrapper>
+        <LeftPanel>
+          <Title>{pet.title}</Title>
+          <Description>{pet.description}</Description>
+          <SizeInfo>
+            📦 <strong>{(pet.fileSize / 1024 / 1024).toFixed(2)} MB</strong>
+          </SizeInfo>
+          <DownloadButton onClick={handleDownload} title="Download image">
+            ⬇️ Download Image
+          </DownloadButton>
+        </LeftPanel>
 
-      <InfoPanel>
-        <Title>{pet.title}</Title>
-        <Description>{pet.description}</Description>
-
-        <MetaInfo>
-          <MetaItem>
-            <MetaLabel>Added</MetaLabel>
-            <MetaValue>{new Date(pet.created).toLocaleDateString()}</MetaValue>
-          </MetaItem>
-          <MetaItem>
-            <MetaLabel>File Size</MetaLabel>
-            <MetaValue>{(pet.fileSize / 1024 / 1024).toFixed(2)} MB</MetaValue>
-          </MetaItem>
-          <MetaItem>
-            <MetaLabel>Pet ID</MetaLabel>
-            <MetaValue>{pet.id.substring(0, 12)}...</MetaValue>
-          </MetaItem>
-        </MetaInfo>
-      </InfoPanel>
+        <ImageWrapper>
+          {imageLoadError ? (
+            <div style={{ color: "white", textAlign: "center" }}>
+              Failed to load image
+            </div>
+          ) : (
+            <PetImage
+              src={pet.url}
+              alt={pet.title}
+              onError={() => setImageLoadError(true)}
+            />
+          )}
+        </ImageWrapper>
+      </ContentWrapper>
     </FullScreenContainer>
   );
 };

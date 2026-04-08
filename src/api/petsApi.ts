@@ -16,6 +16,6 @@ export const fetchPets = async (): Promise<Pet[]> => {
   return response.map((pet, index) => ({
     ...pet,
     id: `pet-${index}-${Date.now()}`,
-    fileSize: Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000, // 500KB - 5MB
+    fileSize: Math.floor(Math.random() * (5000000 - 500000 + 1)) + 50000, // 500KB - 5MB
   }));
 };

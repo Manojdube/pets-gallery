@@ -4,7 +4,7 @@ import styled from "styled-components";
 import Home from "./pages/Home";
 import { PetDetail } from "./pages/PetDetail";
 import About from "./pages/About";
-import { SelectionProvider } from "./context";
+import { PetsDataProvider, PetDetailProvider } from "./context";
 
 const NotFoundContainer = styled.div`
   display: flex;
@@ -53,16 +53,18 @@ const NotFound = () => (
 
 function App() {
   return (
-    <SelectionProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/pets/:id" element={<PetDetail />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </SelectionProvider>
+    <PetsDataProvider>
+      <PetDetailProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/pets/:id" element={<PetDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </PetDetailProvider>
+    </PetsDataProvider>
   );
 }
 
