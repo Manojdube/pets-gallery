@@ -3,8 +3,7 @@ import styled from "styled-components";
 // ─── Layout ────────────────────────────────────────────────────────────────────
 
 export const HeaderContainer = styled.header`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
   padding: 12px 20px;
   background: white;
@@ -12,16 +11,13 @@ export const HeaderContainer = styled.header`
   position: sticky;
   top: 0;
   z-index: 100;
-  gap: 16px;
 
   @media (max-width: 768px) {
     padding: 12px 16px;
-    gap: 12px;
   }
 
   @media (max-width: 640px) {
-    padding: 12px;
-    gap: 8px;
+    padding: 10px 12px;
   }
 `;
 
@@ -90,10 +86,6 @@ export const LogoText = styled.span`
   @media (max-width: 768px) {
     font-size: 20px;
   }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
 `;
 
 // ─── Search ────────────────────────────────────────────────────────────────────
@@ -104,12 +96,10 @@ export const SearchSection = styled.div`
   position: relative;
   margin: 0 auto;
 
+  /* ✅ Mobile max-width constraints hata do — SearchRow full width handle karega */
   @media (max-width: 768px) {
-    max-width: 350px;
-  }
-
-  @media (max-width: 640px) {
-    max-width: 250px;
+    max-width: 100%;
+    margin: 0;
   }
 `;
 
