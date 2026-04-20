@@ -1,5 +1,4 @@
-// context/PetDetailProvider.tsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { Pet } from "../../types/pet";
 import { PetDetailContext } from "./PetDetailContexts";
 
@@ -9,14 +8,17 @@ export const PetDetailProvider = ({ children }: { children: React.ReactNode }) =
   const handleSetCurrentPet = useCallback((pet: Pet | null) => {
     setCurrentPet(pet);
   }, []);
+  
+  const value = useMemo(
+    () => ({
+      currentPet,
+      setCurrentPet: handleSetCurrentPet,
+    }),
+    [currentPet, handleSetCurrentPet]
+  );
 
   return (
-    <PetDetailContext.Provider
-      value={{
-        currentPet,
-        setCurrentPet: handleSetCurrentPet,
-      }}
-    >
+    <PetDetailContext.Provider value={value}>
       {children}
     </PetDetailContext.Provider>
   );

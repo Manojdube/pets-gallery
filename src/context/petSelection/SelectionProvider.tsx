@@ -3,7 +3,7 @@ import type { Pet } from '../../types/pet';
 import { SelectionActionsContext, SelectionStateContext } from './selectionContexts';
 
 const STORAGE_KEY = 'petGallery_selectedPets';
-const DEBOUNCE_DELAY = 200; // ms
+const DEBOUNCE_DELAY = 300; // ms
 
 /**
  * SelectionProvider manages pet selection state with localStorage persistence.

@@ -23,7 +23,7 @@ export const useSelectionActions = (): SelectionActionsType => {
  * Hook to access selection state (selectedIds and selected pets)
  * Components using this hook re-render when selection changes
  *
- * @returns SelectionStateType with: selectedIds (Set), selected (Pet[]), count, isHydrated
+ * @returns SelectionStateType with: selectedIds (Set), selected (Pet[]), count
  * @example
  * const { selected, selectedIds } = useSelectionState();
  */

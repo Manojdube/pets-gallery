@@ -1,12 +1,16 @@
-import { usePetsData, useSelection } from '../context';
-import { Header } from '../components/Header/Header';
-import { type SortOption } from '../components/SortControls';
-import { PetGallery } from '../components/PetGallery';
-import { SkeletonLoader } from '../components/SkeletonLoader';
-import { filterAndSortPets, downloadSelectedPets, calculateTotalFileSize, formatFileSize } from '../utils/petUtils';
-import type { Pet } from '../types/pet';
-import styled from 'styled-components';
-import { useState, useMemo, useCallback } from 'react';
+import { usePetsData, useSelection } from "../context";
+import { Header } from "../components/Header/Header";
+import { PetGallery } from "../components/PetGallery";
+import { SkeletonLoader } from "../components/SkeletonLoader";
+import {
+  downloadSelectedPets,
+  calculateTotalFileSize,
+  formatFileSize,
+} from "../utils/petUtils";
+import type { Pet } from "../types/pet";
+import styled from "styled-components";
+import { useState, useCallback } from "react";
+import { usePetFilters } from "../hooks/usePetFilters";
 
 // Styles
 const PageContainer = styled.div`
@@ -30,75 +34,29 @@ const ResultsInfo = styled.p`
   margin: 0 0 10px 0;
 `;
 
-// Constants
-const DEFAULT_SORT: SortOption = 'nameAZ';
-const DEFAULT_SEARCH = '';
-
-/**
- * Home Page - Main gallery view for pets
- *
- * Features:
- * - Displays paginated grid of pets (12 items per page)
- * - Search pets by title/description
- * - Sort by name or date
- * - Multi-select pets with persistent state
- * - Download selected pets as images
- * - Auto-clear selections on search/sort to prevent stale selections
- * - Responsive layout (1 col mobile, 2 col tablet, 4 col desktop)
- *
- * State Management:
- * - PetsDataProvider: Manages pet data fetching and caching (24hr TTL)
- * - SelectionProvider: Manages pet selections with localStorage persistence
- */
-
 const Home = () => {
   const { pets, isLoading, error } = usePetsData();
-  const { selected, selectAll, clearSelection, toggleSelection } = useSelection();
-  const [sortBy, setSortBy] = useState<SortOption>(DEFAULT_SORT);
-  const [searchQuery, setSearchQuery] = useState(DEFAULT_SEARCH);
+  const { selected, selectAll, clearSelection, toggleSelection } =
+    useSelection();
+  const {
+    sortBy,
+    searchQuery,
+    filteredAndSortedData,
+    handleSearchChange,
+    handleSortChange,
+  } = usePetFilters(pets, clearSelection);
   const [isDownloading, setIsDownloading] = useState(false);
-
-
-  const filteredAndSortedData = useMemo(
-    () => filterAndSortPets(pets, searchQuery, sortBy),
-    [pets, searchQuery, sortBy]
-  );
 
   const handleToggleSelection = useCallback(
     (pet: Pet) => toggleSelection(pet),
-    [toggleSelection]
+    [toggleSelection],
   );
 
-  /**
-   * Handle search input changes
-   * Clears existing selections to prevent confusion with filtered results
-   * Selections persist across searches but are cleared when new search starts
-   */
-  const handleSearchChange = useCallback(
-    (query: string) => {
-      clearSelection();
-      setSearchQuery(query);
-    },
-    [clearSelection]
-  );
-
-  /**
-   * Handle sort option changes
-   * Clears existing selections to prevent confusion with re-ordered results
-   */
-  const handleSortChange = useCallback(
-    (sort: SortOption) => {
-      clearSelection();
-      setSortBy(sort);
-    },
-    [clearSelection]
-  );
-
-  const scrollToTop = () => globalThis.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = () => globalThis.scrollTo({ top: 0, behavior: "smooth" });
 
   const handleDownload = useCallback(async () => {
     if (selected.length === 0) return;
-    
+
     setIsDownloading(true);
     try {
       await downloadSelectedPets(selected);
@@ -106,7 +64,7 @@ const Home = () => {
       clearSelection();
       setIsDownloading(false);
     } catch (err) {
-      console.error('Download failed:', err);
+      console.error("Download failed:", err);
       setIsDownloading(false);
     }
   }, [selected, clearSelection]);
@@ -147,7 +105,10 @@ const Home = () => {
               Found {filteredAndSortedData.length} result(s) for "{searchQuery}"
             </ResultsInfo>
           )}
-          <PetGallery pets={filteredAndSortedData} onToggleSelection={handleToggleSelection} />
+          <PetGallery
+            pets={filteredAndSortedData}
+            onToggleSelection={handleToggleSelection}
+          />
         </>
       )}
     </PageContainer>

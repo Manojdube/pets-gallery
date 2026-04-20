@@ -84,8 +84,6 @@ src/
 │   └── pet.ts
 ├── utils/
 │   └── petUtils.ts
-└── styles/
-    └── GlobalStyles.ts
 ```
 
 ---
@@ -149,7 +147,6 @@ Build a React Context provider that:
 4. Detects hard page reload (F5 / Cmd+R) and clears cache
 5. Provides pet data to entire application via context
 
-Add a custom hook usePetsData() for components to consume this data.
 Include TypeScript interfaces for context shape.
 ```
 
