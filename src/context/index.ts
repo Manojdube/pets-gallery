@@ -8,7 +8,7 @@ export type { SelectionActionsType, SelectionStateType, UseSelectionType } from 
 
 export { PetDetailProvider } from "./petDetail/PetDetailProvider";
 export { usePetDetail } from "./petDetail/usePetDetail";
-export type { PetDetailContextType } from "./petDetail/petDetailContexts";
+export type { PetDetailContextType } from "./petDetail/PetDetailContexts";
 
 export { PetsDataProvider } from "./petsData/PetsDataProvider";
 export type { PetsDataContextType } from "./petsData/PetsDataProvider";
