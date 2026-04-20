@@ -3,7 +3,7 @@ import { fetchPets } from "../api/petsApi";
 import type { Pet } from "../types/pet";
 
 const STORAGE_KEY = "petGallery_petsData";
-const CACHE_DURATION = 24 * 60 * 60 * 1000;
+const CACHE_DURATION = 0;
 
 export const usePets = () => {
   const [pets, setPets] = useState<Pet[]>([]);
