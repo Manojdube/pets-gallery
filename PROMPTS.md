@@ -165,7 +165,6 @@ interface PetsDataContextType {
   pets: Pet[];
   isLoading: boolean;
   error: string | null;
-  isHydrated: boolean;
 }
 
 const isHardReload = (): boolean => {

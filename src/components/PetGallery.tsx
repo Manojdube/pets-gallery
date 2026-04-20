@@ -54,11 +54,11 @@ const PaginationContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const PaginationButton = styled.button<{ isActive?: boolean }>`
+const PaginationButton = styled.button<{ $isActive?: boolean }>`
   padding: 8px 12px;
   border: 1px solid #ddd;
-  background-color: ${(props) => (props.isActive ? '#1976d2' : '#fff')};
-  color: ${(props) => (props.isActive ? '#fff' : '#333')};
+  background-color: ${(props) => (props.$isActive ? '#1976d2' : '#fff')};
+  color: ${(props) => (props.$isActive ? '#fff' : '#333')};
   border-radius: 4px;
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
   font-size: 0.9em;
@@ -66,7 +66,7 @@ const PaginationButton = styled.button<{ isActive?: boolean }>`
   opacity: ${(props) => (props.disabled ? '0.5' : '1')};
 
   &:hover:not(:disabled) {
-    background-color: ${(props) => (props.isActive ? '#1565c0' : '#f0f0f0')};
+    background-color: ${(props) => (props.$isActive ? '#1565c0' : '#f0f0f0')};
   }
 `;
 
@@ -167,7 +167,7 @@ export const PetGallery: React.FC<PetGalleryProps> = ({ pets, onToggleSelection 
             ) : (
               <PaginationButton
                 key={page}
-                isActive={page === currentPage}
+                $isActive={page === currentPage}
                 onClick={() => setCurrentPage(page as number)}
               >
                 {page}

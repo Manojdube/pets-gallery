@@ -13,9 +13,9 @@ export const fetchPets = async (): Promise<Pet[]> => {
   const response = await apiFetch<PetResponse[]>("/pets");
 
   // Add unique IDs and random file sizes to each pet
-  return response.map((pet, index) => ({
+  return response.map((pet) => ({
     ...pet,
-    id: `pet-${index}-${Date.now()}`,
+    id: `pet-${pet.url}`,
     fileSize: Math.floor(Math.random() * (5000000 - 500000 + 1)) + 50000, // 500KB - 5MB
   }));
 };

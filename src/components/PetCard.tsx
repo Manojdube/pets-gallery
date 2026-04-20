@@ -43,19 +43,20 @@ const CheckboxContainer = styled.div`
 `;
 
 const Checkbox = styled.input`
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
+  padding: 2px;
 `;
 
-const Card = styled.div<{ isSelected: boolean }>`
-  border: 2px solid ${(props) => (props.isSelected ? "#007bff" : "#ccc")};
+const Card = styled.div<{ $isSelected: boolean }>`
+  border: 2px solid ${(props) => (props.$isSelected ? "#007bff" : "#ccc")};
   padding: 10px;
   display: flex;
   flex-direction: column;
   height: 290px;
   cursor: pointer;
-  background-color: ${(props) => (props.isSelected ? "#f0f7ff" : "white")};
+  background-color: ${(props) => (props.$isSelected ? "#f0f7ff" : "white")};
   border-radius: 8px;
   transition: box-shadow 0.2s ease;
 
@@ -143,7 +144,7 @@ const PetCard: React.FC<PetCardProps> = ({
           aria-label={`Select ${pet.title}`}
         />
       </CheckboxContainer>
-      <Card isSelected={isSelected} onClick={handleCardClick}>
+      <Card $isSelected={isSelected} onClick={handleCardClick}>
         <ProgressiveImage
           src={pet.url}
           alt={pet.title}

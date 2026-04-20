@@ -3,7 +3,7 @@ import type { Pet } from '../types/pet';
 import { SelectionActionsContext, SelectionStateContext } from './selectionContexts';
 
 const STORAGE_KEY = 'petGallery_selectedPets';
-const DEBOUNCE_DELAY = 300; // ms
+const DEBOUNCE_DELAY = 200; // ms
 
 /**
  * SelectionProvider manages pet selection state with localStorage persistence.
@@ -11,9 +11,9 @@ const DEBOUNCE_DELAY = 300; // ms
  * preventing unnecessary re-renders in components that only need actions.
  *
  * Features:
+ * - Lazy initializes selected state directly from localStorage (no flicker, no useEffect load)
  * - Persists selections to localStorage with debounced saves (300ms)
  * - Provides O(1) lookup performance via Set<petId>
- * - Automatically loads saved selections on mount
  * - Clears selections immediately on download/clear actions
  *
  * @example
@@ -21,30 +21,21 @@ const DEBOUNCE_DELAY = 300; // ms
  *   <YourComponent />
  * </SelectionProvider>
  */
-export const SelectionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selected, setSelected] = useState<Pet[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load selections from localStorage on component mount
-  // This ensures selections persist across page refreshes and route navigation
-  useEffect(() => {
+export const SelectionProvider = ({ children }: { children: React.ReactNode }) => {
+  const [selected, setSelected] = useState<Pet[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setSelected(parsed);
-      }
-    } catch (error) {
-      console.error('Failed to load selection from localStorage:', error);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
     }
-    setIsHydrated(true);
-  }, []);
+  });
 
   // Debounced save to localStorage - saves after 300ms of inactivity
   // Debounce improves performance by reducing write frequency during rapid selections
-  useEffect(() => {
-    if (!isHydrated) return;
 
+  useEffect(() => {
     const timer = setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(selected));
@@ -54,7 +45,7 @@ export const SelectionProvider = ({ children }: { children: React.ReactNode }) =
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [selected, isHydrated]);
+  }, [selected]);
 
   // Create a Set for O(1) lookup performance when checking if a pet is selected
   // Used by PetGallery to efficiently determine which cards should show selected state
@@ -98,7 +89,6 @@ export const SelectionProvider = ({ children }: { children: React.ReactNode }) =
    */
   const clearSelection = useCallback(() => {
     setSelected([]);
-    // Immediately sync to localStorage to avoid debounce delays
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     } catch (error) {
@@ -128,10 +118,9 @@ export const SelectionProvider = ({ children }: { children: React.ReactNode }) =
     () => ({
       selectedIds,
       selected,
-      isHydrated,
       count: selected.length,
     }),
-    [selectedIds, selected, isHydrated]
+    [selectedIds, selected]
   );
 
   return (

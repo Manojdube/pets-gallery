@@ -6,7 +6,7 @@ import { SkeletonLoader } from '../components/SkeletonLoader';
 import { filterAndSortPets, downloadSelectedPets, calculateTotalFileSize, formatFileSize } from '../utils/petUtils';
 import type { Pet } from '../types/pet';
 import styled from 'styled-components';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 
 // Styles
 const PageContainer = styled.div`
@@ -33,7 +33,6 @@ const ResultsInfo = styled.p`
 // Constants
 const DEFAULT_SORT: SortOption = 'nameAZ';
 const DEFAULT_SEARCH = '';
-const SESSION_DEFAULTS_KEY = 'petGallery_sessionStarted';
 
 /**
  * Home Page - Main gallery view for pets
@@ -50,8 +49,8 @@ const SESSION_DEFAULTS_KEY = 'petGallery_sessionStarted';
  * State Management:
  * - PetsDataProvider: Manages pet data fetching and caching (24hr TTL)
  * - SelectionProvider: Manages pet selections with localStorage persistence
- * - Hard reload detection: Clears cache and selections on F5/Cmd+R
  */
+
 const Home = () => {
   const { pets, isLoading, error } = usePetsData();
   const { selected, selectAll, clearSelection, toggleSelection } = useSelection();
@@ -59,16 +58,6 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState(DEFAULT_SEARCH);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Reset state on hard reload (session start)
-  useEffect(() => {
-    const isNewSession = sessionStorage.getItem(SESSION_DEFAULTS_KEY) === 'true';
-    if (isNewSession) {
-      setSortBy(DEFAULT_SORT);
-      setSearchQuery(DEFAULT_SEARCH);
-      clearSelection();
-      sessionStorage.removeItem(SESSION_DEFAULTS_KEY);
-    }
-  }, [clearSelection]);
 
   const filteredAndSortedData = useMemo(
     () => filterAndSortPets(pets, searchQuery, sortBy),
