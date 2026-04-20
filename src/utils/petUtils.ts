@@ -154,3 +154,9 @@ export const filterAndSortPets = (
   searchQuery: string,
   sortOption: SortOption
 ): Pet[] => sortPets(filterPets(pets, searchQuery), sortOption);
+
+
+export const getImageId = (url: string): string | null => {
+  const match = url.match(/photos\/(\d+)\//);
+  return match ? match[1] : null;
+};

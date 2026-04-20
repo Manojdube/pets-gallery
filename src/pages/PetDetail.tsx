@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { usePetDetail, usePetsData } from "../context";
-import { useState, useCallback, useMemo } from "react";
+import {useCallback, useMemo } from "react";
 import ProgressiveImage from "../components/ProgressiveImage";
 
 const FullScreenContainer = styled.div`
@@ -116,21 +116,6 @@ const DownloadButton = styled.button`
   }
 `;
 
-const ImageWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-`;
-
-const PetImage = styled.img`
-  max-width: 100%;
-  max-height: 80vh;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  object-fit: contain;
-`;
-
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
@@ -145,7 +130,6 @@ export const PetDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { currentPet } = usePetDetail();
   const { pets, isLoading } = usePetsData();
-  const [imageLoadError, setImageLoadError] = useState(false);
 
   // Try to get pet from context first (when clicked from card)
   // Fall back to finding in pets array (for refresh scenarios)
@@ -224,20 +208,12 @@ export const PetDetail = () => {
           </DownloadButton>
         </LeftPanel>
 
-        <ImageWrapper>
-          {imageLoadError ? (
-            <div style={{ color: "white", textAlign: "center" }}>
-              Failed to load image
-            </div>
-          ) : (
-            <ProgressiveImage
-              src={pet.url}
-              alt={pet.title}
-              height="80vh"
-              objectFit="contain"
-            />
-          )}
-        </ImageWrapper>
+        <ProgressiveImage
+          src={pet.url}
+          alt={pet.title}
+          height="80vh"
+          objectFit="contain"
+        />
       </ContentWrapper>
     </FullScreenContainer>
   );
