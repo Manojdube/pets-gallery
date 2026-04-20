@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { usePetDetail, usePetsData } from "../context";
 import { useState, useCallback, useMemo } from "react";
+import ProgressiveImage from "../components/ProgressiveImage";
 
 const FullScreenContainer = styled.div`
   min-height: 100vh;
@@ -150,18 +151,18 @@ export const PetDetail = () => {
   // Fall back to finding in pets array (for refresh scenarios)
   const pet = useMemo(() => {
     if (currentPet) return currentPet;
-    
+
     // If page is refreshed, find pet from the global pets array
     if (id && pets.length > 0) {
       return pets.find((p) => p.id === id);
     }
-    
+
     return null;
   }, [currentPet, id, pets]);
 
   const handleDownload = useCallback(async () => {
     if (!pet) return;
-    
+
     try {
       const response = await fetch(pet.url);
       const blob = await response.blob();
@@ -229,10 +230,11 @@ export const PetDetail = () => {
               Failed to load image
             </div>
           ) : (
-            <PetImage
+            <ProgressiveImage
               src={pet.url}
               alt={pet.title}
-              onError={() => setImageLoadError(true)}
+              height="80vh"
+              objectFit="contain"
             />
           )}
         </ImageWrapper>

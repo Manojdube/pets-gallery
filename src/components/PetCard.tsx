@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { usePetDetail } from '../context';
-import type { Pet } from '../types/pet';
-import ProgressiveImage from './ProgressiveImage';
+import React, { useCallback, useMemo } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { usePetDetail } from "../context";
+import type { Pet } from "../types/pet";
+import ProgressiveImage from "./ProgressiveImage";
 
 // Types
 interface PetCardProps {
@@ -49,13 +49,13 @@ const Checkbox = styled.input`
 `;
 
 const Card = styled.div<{ isSelected: boolean }>`
-  border: 2px solid ${(props) => (props.isSelected ? '#007bff' : '#ccc')};
+  border: 2px solid ${(props) => (props.isSelected ? "#007bff" : "#ccc")};
   padding: 10px;
   display: flex;
   flex-direction: column;
-  min-height: 290px;
+  height: 290px;
   cursor: pointer;
-  background-color: ${(props) => (props.isSelected ? '#f0f7ff' : 'white')};
+  background-color: ${(props) => (props.isSelected ? "#f0f7ff" : "white")};
   border-radius: 8px;
   transition: box-shadow 0.2s ease;
 
@@ -97,11 +97,18 @@ const DetailsLink = styled.span`
 `;
 
 // Component
-const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection }) => {
+const PetCard: React.FC<PetCardProps> = ({
+  pet,
+  isSelected,
+  onToggleSelection,
+}) => {
   const navigate = useNavigate();
   const { setCurrentPet } = usePetDetail();
 
-  const formattedDate = useMemo(() => new Date(pet.created).toLocaleString(), [pet.created]);
+  const formattedDate = useMemo(
+    () => new Date(pet.created).toLocaleString(),
+    [pet.created],
+  );
 
   /**
    * Handle checkbox change
@@ -112,7 +119,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
       e.stopPropagation();
       onToggleSelection(pet);
     },
-    [pet, onToggleSelection]
+    [pet, onToggleSelection],
   );
 
   /**
@@ -137,7 +144,12 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
         />
       </CheckboxContainer>
       <Card isSelected={isSelected} onClick={handleCardClick}>
-        <ProgressiveImage src={pet.url} alt={pet.title} />
+        <ProgressiveImage
+          src={pet.url}
+          alt={pet.title}
+          height={200}
+          objectFit="cover"
+        />
         <PetInfoText>{pet.title}</PetInfoText>
         <Description>{pet.description}</Description>
         <LastUpdated>Last updated: {formattedDate}</LastUpdated>
