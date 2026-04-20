@@ -1,13 +1,14 @@
 // context/index.ts - Barrel exports for context module
 
-export { SelectionProvider } from "./SelectionProvider";
-export { useSelectionActions, useSelectionState, useSelection } from "./useSelection";
-export type { SelectionActionsType, SelectionStateType, UseSelectionType } from "./selectionTypes";
-export { SelectionActionsContext, SelectionStateContext } from "./selectionContexts";
+export { usePetsData } from "./petsData/usePetsData";
 
-export { PetDetailProvider } from "./PetDetailProvider";
-export { usePetDetail } from "./usePetDetail";
-export type { PetDetailContextType } from "./petDetailContexts";
+export { SelectionProvider } from "../context/petSelection/SelectionProvider";
+export { useSelectionActions, useSelectionState, useSelection } from "./petSelection/useSelection";
+export type { SelectionActionsType, SelectionStateType, UseSelectionType } from "./petSelection/selectionTypes";
 
-export { PetsDataProvider, usePetsData } from "./PetsDataProvider";
-export type { PetsDataContextType } from "./PetsDataProvider";
+export { PetDetailProvider } from "./petDetail/PetDetailProvider";
+export { usePetDetail } from "./petDetail/usePetDetail";
+export type { PetDetailContextType } from "./petDetail/petDetailContexts";
+
+export { PetsDataProvider } from "./petsData/PetsDataProvider";
+export type { PetsDataContextType } from "./petsData/PetsDataProvider";

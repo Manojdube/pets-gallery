@@ -1,6 +1,6 @@
 // context/usePetDetail.ts
 import { useContext } from "react";
-import { PetDetailContext, type PetDetailContextType } from "./petDetailContexts";
+import { PetDetailContext, type PetDetailContextType } from "./PetDetailContexts";
 
 export const usePetDetail = (): PetDetailContextType => {
   const context = useContext(PetDetailContext);

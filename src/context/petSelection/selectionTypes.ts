@@ -1,5 +1,5 @@
 // context/selectionTypes.ts
-import type { Pet } from "../types/pet";
+import type { Pet } from "../../types/pet";
 
 export interface SelectionActionsType {
   toggleSelection: (pet: Pet) => void;

@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
-import type { Pet } from '../types/pet';
+import type { Pet } from '../../types/pet';
 import { SelectionActionsContext, SelectionStateContext } from './selectionContexts';
 
 const STORAGE_KEY = 'petGallery_selectedPets';
