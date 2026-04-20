@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { usePetDetail } from '../context';
 import type { Pet } from '../types/pet';
+import ProgressiveImage from './ProgressiveImage';
 
 // Types
 interface PetCardProps {
@@ -52,7 +53,7 @@ const Card = styled.div<{ isSelected: boolean }>`
   padding: 10px;
   display: flex;
   flex-direction: column;
-  min-height: 250px;
+  min-height: 290px;
   cursor: pointer;
   background-color: ${(props) => (props.isSelected ? '#f0f7ff' : 'white')};
   border-radius: 8px;
@@ -61,13 +62,6 @@ const Card = styled.div<{ isSelected: boolean }>`
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-`;
-
-const PetImage = styled.img`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 6px;
 `;
 
 const PetInfoText = styled.p`
@@ -143,7 +137,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection })
         />
       </CheckboxContainer>
       <Card isSelected={isSelected} onClick={handleCardClick}>
-        <PetImage src={pet.url} alt={pet.title} />
+        <ProgressiveImage src={pet.url} alt={pet.title} />
         <PetInfoText>{pet.title}</PetInfoText>
         <Description>{pet.description}</Description>
         <LastUpdated>Last updated: {formattedDate}</LastUpdated>
